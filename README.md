@@ -81,7 +81,7 @@ curl http://localhost:7700/v1/chat/completions \
   -d @- <<'EOF' | jq '.choices[0].message.content'
 {
   "model": "gemma-4-E2B-it-Q4_0",
-  "messages": [{"role": "user", "content": "Qu'est-ce qu'un agent IA ?"}],
+  "messages": [{"role": "user", "content": "Qu'est-ce qu'un agent IA ? Réponds en 1 phrase courte."}],
   "max_tokens": 512
 }
 EOF
