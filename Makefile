@@ -7,14 +7,14 @@ TEMPLATE   := chat-templates/gemma-template.jinja
 NETWORK    := tp-llama
 NET_SUBNET := 10.244.77.0/24
 
-# docker accessible sans sudo seulement si le daemon tourne ET l'utilisateur est dans le groupe
+# docker accessible without sudo only if daemon is running AND user is in the group
 DOCKER := $(shell docker info >/dev/null 2>&1 && echo docker || echo "sudo docker")
 
-# Paquets Ubuntu requis
-# Format: binaire:paquet (vérifie le binaire) ou paquet seul (vérifie via dpkg)
+# Required Ubuntu packages
+# Format: binary:package (check binary) or package only (check via dpkg)
 APT_DEPS := docker:docker.io curl:curl wget:wget jq:jq
 
-# Paramètres du serveur llama.cpp
+# llama.cpp server parameters
 MODEL_FILE       := /models/$(notdir $(MODEL))
 TEMPLATE_FILE    := /template/gemma-template.jinja
 HOST             := 0.0.0.0
@@ -34,7 +34,7 @@ MIN_P            := 0.0
 REPEAT_PENALTY   := 1.0
 PRESENCE_PENALTY := 0.0
 
-# Arguments du serveur (1 paramètre = 1 variable)
+# Server arguments (1 parameter = 1 variable)
 ARG_MODEL            := -m $(MODEL_FILE)
 ARG_TEMPLATE         := --chat-template-file $(TEMPLATE_FILE)
 ARG_HOST             := --host $(HOST)
@@ -64,15 +64,15 @@ SERVER_ARGS := $(ARG_MODEL) $(ARG_TEMPLATE) $(ARG_HOST) $(ARG_PORT) \
 
 .PHONY: help setup deps template pull model start stop status logs test
 
-help: ## Affiche cette aide
-	@echo "TP ESISAR - Agents IA - LLM"
+help: ## Show this help
+	@echo "TP ESISAR - AI Agents - LLM"
 	@echo ""
-	@echo "Cibles disponibles :"
+	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-8s %s\n", $$1, $$2}'
 
-setup: deps pull model template ## Préparation complète (paquets, image, modèle, template)
+setup: deps pull model template ## Full setup (packages, image, model, template)
 
-deps: ## Installe les paquets requis et démarre Docker
+deps: ## Install required packages and start Docker
 	@missing=""; \
 	for dep in $(APT_DEPS); do \
 		case $$dep in \
@@ -83,54 +83,54 @@ deps: ## Installe les paquets requis et démarre Docker
 		esac; \
 	done; \
 	if [ -n "$$missing" ]; then \
-		echo "Installation via apt :$$missing"; \
+		echo "Installing via apt:$$missing"; \
 		sudo apt-get update && sudo apt-get install -y $$missing; \
 	else \
-		echo "Paquets déjà présents."; \
+		echo "Packages already present."; \
 	fi
 	@docker info >/dev/null 2>&1 || { \
-		echo "Démarrage du daemon Docker..."; \
+		echo "Starting Docker daemon..."; \
 		sudo systemctl enable --now docker; \
 	}
 	@if ! groups | grep -qw docker; then \
 		sudo usermod -aG docker $$USER 2>/dev/null && \
-		echo "[$$USER ajouté au groupe docker — reconnexion requise ; le Makefile utilise 'sudo docker' en attendant]"; \
+		echo "[$$USER added to docker group - logout required; Makefile uses 'sudo docker' meanwhile]"; \
 	fi
 	@$(DOCKER) --version
 
-template: ## Copie le chat template depuis /tmp dans le dépôt
+template: ## Copy chat template from /tmp to the repository
 	@if [ -f $(TEMPLATE) ]; then \
-		echo "Chat template déjà présent : $(TEMPLATE)"; \
+		echo "Chat template already present: $(TEMPLATE)"; \
 	elif [ -f /tmp/gemma-template.jinja ]; then \
 		mkdir -p chat-templates && cp /tmp/gemma-template.jinja $(TEMPLATE) && \
-		echo "Chat template copié depuis /tmp/gemma-template.jinja"; \
+		echo "Chat template copied from /tmp/gemma-template.jinja"; \
 	else \
-		echo "ERREUR : /tmp/gemma-template.jinja introuvable (demander le fichier au prof)"; exit 1; \
+		echo "ERROR: /tmp/gemma-template.jinja not found (ask your teacher for the file)"; exit 1; \
 	fi
 
-pull: ## Télécharge l'image llama.cpp:server
+pull: ## Download llama.cpp:server image
 	$(DOCKER) pull $(IMAGE)
 
-model: ## Télécharge le modèle GGUF (Q4) dans models/
+model: ## Download GGUF model (Q4) to models/
 	@if [ -f $(MODEL) ]; then \
-		echo "Modèle déjà présent : $(MODEL)"; \
+		echo "Model already present: $(MODEL)"; \
 	else \
 		mkdir -p models && \
 		wget -c -O $(MODEL) "$(MODEL_URL)"; \
 	fi
 
-start: ## Démarre le serveur llama.cpp (modèle Gemma) sur le port 7700
+start: ## Start llama.cpp server (Gemma model) on port 7700
 	@if ! $(DOCKER) image inspect $(IMAGE) >/dev/null 2>&1; then \
-		echo "ERREUR : image absente — lancez 'make setup' (ou 'make pull')"; exit 1; \
+		echo "ERROR: image missing - run 'make setup' (or 'make pull')"; exit 1; \
 	fi
 	@if [ ! -f $(MODEL) ]; then \
-		echo "ERREUR : modèle absent — lancez 'make setup' (ou 'make model')"; exit 1; \
+		echo "ERROR: model missing - run 'make setup' (or 'make model')"; exit 1; \
 	fi
 	@if [ ! -f $(TEMPLATE) ]; then \
-		echo "ERREUR : chat template absent — lancez 'make template'"; exit 1; \
+		echo "ERROR: chat template missing - run 'make template'"; exit 1; \
 	fi
 	@if [ -n "$$($(DOCKER) ps -q -f name=^$(CONTAINER)$$)" ]; then \
-		echo "Le conteneur '$(CONTAINER)' est déjà en cours d'exécution."; \
+		echo "Container '$(CONTAINER)' is already running."; \
 	else \
 		$(DOCKER) rm -f $(CONTAINER) >/dev/null 2>&1 || true; \
 		$(DOCKER) network inspect $(NETWORK) >/dev/null 2>&1 || $(DOCKER) network create --subnet $(NET_SUBNET) $(NETWORK); \
@@ -141,19 +141,19 @@ start: ## Démarre le serveur llama.cpp (modèle Gemma) sur le port 7700
 			--health-cmd "curl -sf -m 5 http://localhost:$(PORT)/health" \
 			--health-interval 30s --health-start-period 90s \
 			$(IMAGE) $(SERVER_ARGS); \
-		echo "llama-server démarré sur http://localhost:$(PORT)"; \
+		echo "llama-server started on http://localhost:$(PORT)"; \
 	fi
 
-stop: ## Arrête (et supprime) le conteneur llama-server
+stop: ## Stop (and remove) the llama-server container
 	$(DOCKER) stop $(CONTAINER)
 
-status: ## Affiche l'état du conteneur
+status: ## Show container status
 	@$(DOCKER) ps -a --filter name=^$(CONTAINER)$$ --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 
-logs: ## Affiche les journaux du serveur
+logs: ## Show server logs
 	$(DOCKER) logs --tail 100 $(CONTAINER)
 
-test: ## Envoie une requête de test sur /v1/chat/completions (réponse via jq)
+test: ## Send a test request to /v1/chat/completions (answer via jq)
 	curl -s http://localhost:$(PORT)/v1/chat/completions \
 		-H "Content-Type: application/json" \
-		-d '{"model": "gemma", "messages": [{"role": "user", "content": "D\u00e9finis un agent IA en une phrase."}], "max_tokens": 512}' | jq '.choices[0].message.content'
+		-d '{"model": "gemma", "messages": [{"role": "user", "content": "Define an AI agent in one sentence."}], "max_tokens": 512}' | jq '.choices[0].message.content'

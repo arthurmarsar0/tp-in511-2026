@@ -1,1 +1,9 @@
 models/
+opencode-temp/
+venv/
+
+# Student solution (reference implementation)
+sqlite_agent.py
+
+# Local databases
+*.db
