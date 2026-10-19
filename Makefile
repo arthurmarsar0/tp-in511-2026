@@ -12,7 +12,7 @@ DOCKER := $(shell docker info >/dev/null 2>&1 && echo docker || echo "sudo docke
 
 # Required Ubuntu packages
 # Format: binary:package (check binary) or package only (check via dpkg)
-APT_DEPS := docker:docker.io curl:curl wget:wget jq:jq
+APT_DEPS := docker:docker.io curl:curl wget:wget jq:jq python3-venv
 
 # llama.cpp server parameters
 MODEL_FILE       := /models/$(notdir $(MODEL))
