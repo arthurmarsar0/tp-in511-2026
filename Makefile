@@ -12,7 +12,7 @@ DOCKER := $(shell docker info >/dev/null 2>&1 && echo docker || echo "sudo docke
 
 # Required Ubuntu packages
 # Format: binary:package (check binary) or package only (check via dpkg)
-APT_DEPS := docker:docker.io curl:curl wget:wget jq:jq python3-venv
+APT_DEPS := docker:docker.io curl:curl wget:wget jq:jq python3:python3 python3-venv
 
 # llama.cpp server parameters
 MODEL_FILE       := /models/$(notdir $(MODEL))
@@ -62,7 +62,7 @@ SERVER_ARGS := $(ARG_MODEL) $(ARG_TEMPLATE) $(ARG_HOST) $(ARG_PORT) \
 	$(ARG_TEMP) $(ARG_TOP_K) $(ARG_TOP_P) $(ARG_MIN_P) \
 	$(ARG_REPEAT_PENALTY) $(ARG_PRESENCE_PENALTY)
 
-.PHONY: help setup deps template pull model start stop status logs test
+.PHONY: help setup deps pyenv template pull model start stop status logs test
 
 help: ## Show this help
 	@echo "TP ESISAR - AI Agents - LLM"
@@ -70,7 +70,7 @@ help: ## Show this help
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-8s %s\n", $$1, $$2}'
 
-setup: deps pull model template ## Full setup (packages, image, model, template)
+setup: deps pyenv pull model template ## Full setup (packages, Python env, image, model, template)
 
 deps: ## Install required packages and start Docker
 	@missing=""; \
@@ -97,6 +97,16 @@ deps: ## Install required packages and start Docker
 		echo "[$$USER added to docker group - logout required; Makefile uses 'sudo docker' meanwhile]"; \
 	fi
 	@$(DOCKER) --version
+
+pyenv: ## Create Python virtual environment and install dependencies
+	@if [ ! -d venv ]; then \
+		echo "Creating virtual environment..."; \
+		python3 -m venv venv; \
+	fi
+	@echo "Installing Python dependencies..."
+	@./venv/bin/pip install --quiet --upgrade pip
+	@./venv/bin/pip install --quiet msgspec requests
+	@echo "Python environment ready: ./venv/bin/python"
 
 template: ## Copy chat template from /tmp to the repository
 	@if [ -f $(TEMPLATE) ]; then \
