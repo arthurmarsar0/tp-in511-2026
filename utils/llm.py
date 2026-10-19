@@ -87,7 +87,7 @@ def call_llm(
         payload["tools"] = tools
         payload["tool_choice"] = "auto"
 
-    response = requests.post(LLM_URL, json=payload, timeout=120)
+    response = requests.post(LLM_URL, json=payload, timeout=300)
     response.raise_for_status()
     return response.json()
 
