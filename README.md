@@ -67,16 +67,24 @@ Paramètres appliqués :
 
 ## Étape 2 — Test de l'API
 
+**Vérifier la disponibilité :**
+
 ```bash
 curl http://localhost:7700/health
+```
 
+**Tester l'API de chat :**
+
+```bash
 curl http://localhost:7700/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{
-    "model": "gemma-4-E2B-it-Q4_0",
-    "messages": [{"role": "user", "content": "Qu'est-ce qu'un agent IA ?"}],
-    "max_tokens": 512
-  }' | jq '.choices[0].message.content'
+  -d @- <<'EOF' | jq '.choices[0].message.content'
+{
+  "model": "gemma-4-E2B-it-Q4_0",
+  "messages": [{"role": "user", "content": "Qu'est-ce qu'un agent IA ?"}],
+  "max_tokens": 512
+}
+EOF
 ```
 
 **Note sur le thinking** : ce modèle raisonne nativement. Le raisonnement apparaît dans le champ `reasoning_content`, la réponse finale dans `content`. Utiliser `max_tokens` ≥ 512 pour laisser le raisonnement se terminer.
