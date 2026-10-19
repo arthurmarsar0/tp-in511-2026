@@ -75,14 +75,12 @@ setup: deps pull model template ## Préparation complète (paquets, image, modè
 deps: ## Installe les paquets requis et démarre Docker
 	@missing=""; \
 	for dep in $(APT_DEPS); do \
-		if [[ "$$dep" == *:* ]]; then \
-			bin=$${dep%%:*}; \
-			pkg=$${dep##*:}; \
-			command -v $$bin >/dev/null 2>&1 || missing="$$missing $$pkg"; \
-		else \
-			pkg=$$dep; \
-			dpkg -s $$pkg >/dev/null 2>&1 || missing="$$missing $$pkg"; \
-		fi; \
+		case $$dep in \
+			*:*) bin=$${dep%%:*}; pkg=$${dep##*:}; \
+				command -v $$bin >/dev/null 2>&1 || missing="$$missing $$pkg" ;; \
+			*)   pkg=$$dep; \
+				dpkg -s $$pkg >/dev/null 2>&1 || missing="$$missing $$pkg" ;; \
+		esac; \
 	done; \
 	if [ -n "$$missing" ]; then \
 		echo "Installation via apt :$$missing"; \
