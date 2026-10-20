@@ -2,12 +2,6 @@ models/
 opencode-temp/
 venv/
 
-# Reference solutions (teacher only, not for students)
-sqlite_agent.py
-exercice_1_1.py
-exercice_1_2.py
-exercice_1_3.py
-test_contexte.py
 
 # Local databases
 *.db
