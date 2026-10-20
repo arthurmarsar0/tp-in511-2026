@@ -66,7 +66,7 @@ def make_registry(tool_classes: list) -> dict:
 
 
 def call_llm(
-    messages: list, tools: Optional[list] = None, max_tokens: int = 1024
+    messages: list, tools: Optional[list] = None, max_tokens: int = 2048
 ) -> dict:
     """Call the local LLM server.
 
