@@ -22,6 +22,48 @@ Le LLM a choisi `Calculator` parce que cet outil était disponible et correspond
 
 Sans l'argument `tools`, le LLM ne reçoit pas la description des outils disponibles. Il doit donc répondre directement à partir de ses propres capacités, sans demander l'exécution de `Calculator`. Pour cette opération simple, il pourrait répondre directement « 120 ».
 
+### Exercice 1.2 — Exécuter l'outil appelé
+
+**Pourquoi faut-il ajouter la réponse du LLM (`message`) avant le résultat de l'outil ?**
+
+*The language model dont have any statement and dont utilizes remainder memory between two calls of the llm. Knowing this behaviour, the model resent the "internql conversation" as some feature to depart, so it has some refinement on the answer*
+
+**Quel est le rôle du champ `tool_call_id` ?**
+
+*Associate each call to its operation by an unique string, thats important to keep track of the processus of the LLM to get to the answer*
+
+**Que se passe-t-il si vous oubliez d'ajouter le résultat de l'outil à l'historique ?**
+
+*The LLM will ever not read the answer, that means that probabably it will either create an answer or remake that same call*
+
+### Exercice 1.3 - Définir votre propre outil
+
+**Comment le LLM sait-il quels sont les paramètres de l'outil ?**
+
+Because of the function `make_tool`, that inside of it has also `to_openai_tool` that makes the converstion needed to the LLM be able to understand. Basically changes to a schema JSON informing the parametres, its type and "nullability".
+
+**2. Que se passe-t-il si vous ajoutez un champ avec une valeur par défaut ?**
+
+Si un champ possède une valeur par défaut, il devient généralement optionnel dans le schéma JSON. Le LLM peut donc appeler l'outil sans fournir ce paramètre. Dans ce cas, Python utilise automatiquement la valeur définie par défaut lors de l'instanciation de la dataclass.
+
+**3. Pouvez-vous ajouter un champ `Literal["french", "english"]` pour restreindre les valeurs possibles ?**
+
+Oui, il est possible d'utiliser `Literal` du module `typing` pour limiter les valeurs autorisées dans le schéma JSON. Par exemple, un champ `language: Literal["french", "english"]` permet d'indiquer au LLM que seules ces deux valeurs sont acceptées. Cependant, cette annotation ne garantit pas à elle seule une validation des valeurs à l'exécution.
+
+### Exercice 2.1 - La boucle complète
+
+### Exercice 2.2 - Créer un agent SQL
+
+### Exercice 2.3 - Améliorer le system prompt
+
+
+**Quelle variante produit les meilleures réponses ?**
+
+**Le prompt influence-t-il le nombre d'itérations ?**
+
+**Peut-on demander au LLM de "penser étape par étape" (chain-of-thought) ?**
+
+
 ## Difficultés rencontrées
 
 - ...
