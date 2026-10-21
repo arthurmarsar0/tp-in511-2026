@@ -124,6 +124,9 @@ pull: ## Download llama.cpp:server image
 model: ## Download GGUF model (Q4) to models/
 	@if [ -f $(MODEL) ]; then \
 		echo "Model already present: $(MODEL)"; \
+	elif [ -f $(HOME)/$(notdir $(MODEL)) ]; then \
+		mkdir -p models && cp $(HOME)/$(notdir $(MODEL)) $(MODEL) && \
+		echo "Model copied from $(HOME)/$(notdir $(MODEL))"; \
 	else \
 		mkdir -p models && \
 		wget -c -O $(MODEL) "$(MODEL_URL)"; \
