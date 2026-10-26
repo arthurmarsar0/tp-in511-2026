@@ -54,14 +54,23 @@ Oui, il est possible d'utiliser `Literal` du module `typing` pour limiter les va
 
 ### Exercice 2.2 - Créer un agent SQL
 
-### Exercice 2.3 - Améliorer le system prompt
+Nous avons repris la boucle de l'exercice 2.1, mais avec les outils SQL (`SQLQuery`, `ListTables`, `DescribeTable`) créés par `make_sql_tools(db)` au lieu de `Calculator`. La boucle est limitée à 5 itérations par question.
 
+En général, le LLM commence par `ListTables` ou `DescribeTable` pour voir la structure de la base, puis il écrit la requête avec `SQLQuery`. Le résultat de chaque outil est ajouté à l'historique avec le rôle `"tool"`, et le LLM s'en sert pour donner la réponse finale.
+
+### Exercice 2.3 - Améliorer le system prompt
 
 **Quelle variante produit les meilleures réponses ?**
 
+La variante A (JOINs) donne les meilleures réponses pour les questions qui utilisent plusieurs tables, parce que le LLM fait une seule requête au lieu de plusieurs. La variante B est utile quand une requête échoue, parce que le LLM corrige la requête au lieu de s'arrêter.
+
 **Le prompt influence-t-il le nombre d'itérations ?**
 
+Oui. Avec la variante A, le LLM fait moins d'appels car il regroupe les informations dans une seule requête. Avec la variante C, il explique avant chaque appel, ce qui donne des réponses plus grands.
+
 **Peut-on demander au LLM de "penser étape par étape" (chain-of-thought) ?**
+
+Oui. Le LLM explore d'abord le schéma étape par étape puis écrit la requête. Comme le modèle raisonne déjà dans le champ reasoning_content, l'effet est moins visible, mais ça l'aide à suivre un ordre logique.
 
 
 ## Difficultés rencontrées
