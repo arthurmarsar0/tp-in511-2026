@@ -107,7 +107,11 @@ Une solution serait d'utiliser un résumé cumulatif, mis à jour progressivemen
 
 ## Démarche suivie
 
-- ...
+### Démarche suivie
+
+Dans un premier temps, nous avons étudié le code fourni afin de comprendre son fonctionnement et les outils mis à notre disposition. Ensuite, nous avons adopté une approche progressive, en implémentant les fonctionnalités étape par étape et en effectuant des tests réguliers.
+
+Cette démarche nous a permis de vérifier le bon fonctionnement de chaque étape et de comprendre en profondeur les mécanismes utilisés avant de passer à la suivante.
 
 ## Solutions apportées et résultats
 
